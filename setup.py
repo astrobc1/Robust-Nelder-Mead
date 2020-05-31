@@ -13,7 +13,7 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="neldermead",
+    name="robustneldermead",
     version="1.0.0",
     author="Bryson Cale",
     author_email="bryson.cale1@gmail.com",

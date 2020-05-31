@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tutorials &#8212; Robust Nelder Mead  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="neldermead_api.html" />
+    <link rel="prev" title="Nelder Mead Optimization" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<p>Here we demonstrate how to use the Nelder-Mead optimization routine. Internally, the solver utilizes numpy to expedite the optimization algorithm, as well a a container for optimiztion parameters (LINK) to ensure interation with the user is straightforward. Target functions may use the high level parameters module, or rely only on numpy arrays for parametrizing the model.</p>
+<div class="section" id="example-1-fitting-a-gaussian-parameter-based">
+<h2>Example 1: Fitting a Gaussian (Parameter based)<a class="headerlink" href="#example-1-fitting-a-gaussian-parameter-based" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">neldermead.neldermead</span> <span class="kn">import</span> <span class="n">NelderMead</span>
+<span class="kn">from</span> <span class="nn">optimparameters</span> <span class="kn">import</span> <span class="n">parameters</span> <span class="k">as</span> <span class="n">Parameters</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="k">def</span> <span class="nf">gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">pars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">pars</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">optimize_gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">data</span> <span class="o">-</span> <span class="n">model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+    
+    <span class="c1"># Return value to minimize, and constraint (constraint = g(x) &gt; 0)</span>
+    <span class="c1"># Here we return 1 since this model does not utilize a constraint.</span>
+    <span class="k">return</span> <span class="n">rms</span><span class="p">,</span> <span class="mi">1</span>
+
+
+<span class="c1"># An x grid</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="o">.</span><span class="mi">01</span><span class="p">)</span>
+
+<span class="c1"># The &quot;true&quot; parameters and Gaussian</span>
+<span class="n">true_pars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">])</span>
+<span class="n">true_gauss</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">true_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">true_gauss_noisy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">true_gauss</span><span class="p">)</span>
+
+<span class="c1"># Make a noisy version</span>
+<span class="n">true_gauss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">true_gauss</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">true_gauss</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+    <span class="n">true_gauss_noisy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">true_gauss</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># A simple guess</span>
+<span class="n">guess_pars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.9</span><span class="p">])</span>
+<span class="n">guess_guass</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">guess_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c1"># Optimize the model from the starting guess</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">NelderMead</span><span class="p">(</span><span class="n">optimize_gauss</span><span class="p">,</span> <span class="n">guess_pars</span><span class="p">,</span> <span class="n">args_to_pass</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">true_gauss_noisy</span><span class="p">))</span>
+<span class="n">opt_result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="c1"># Extract the best fit pars and plot the result</span>
+<span class="n">best_fit_pars</span> <span class="o">=</span> <span class="n">opt_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">gauss_best_fit</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">best_fit_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">true_gauss_noisy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Noisy Data&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">guess_guass</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Guess&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gauss_best_fit</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Best Fit Model&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-2-fitting-a-gaussian-numpy-based">
+<h2>Example 2: Fitting a Gaussian (Numpy based)<a class="headerlink" href="#example-2-fitting-a-gaussian-numpy-based" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">neldermead.neldermead</span> <span class="kn">import</span> <span class="n">NelderMead</span>
+<span class="kn">from</span> <span class="nn">optimparameters</span> <span class="kn">import</span> <span class="n">parameters</span> <span class="k">as</span> <span class="n">Parameters</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="k">def</span> <span class="nf">gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">pars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">pars</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">optimize_gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">data</span> <span class="o">-</span> <span class="n">model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+    
+    <span class="c1"># Return value to minimize, and constraint (constraint = g(x) &gt; 0)</span>
+    <span class="c1"># Here we return 1 since this model does not utilize a constraint.</span>
+    <span class="k">return</span> <span class="n">rms</span><span class="p">,</span> <span class="mi">1</span>
+
+
+<span class="c1"># An x grid</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="o">.</span><span class="mi">01</span><span class="p">)</span>
+
+<span class="c1"># The &quot;true&quot; parameters and Gaussian</span>
+<span class="n">true_pars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">])</span>
+<span class="n">true_gauss</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">true_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">true_gauss_noisy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">true_gauss</span><span class="p">)</span>
+
+<span class="c1"># Make a noisy version</span>
+<span class="n">true_gauss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">true_gauss</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">true_gauss</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+    <span class="n">true_gauss_noisy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">true_gauss</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># A simple guess</span>
+<span class="n">guess_pars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.9</span><span class="p">])</span>
+<span class="n">guess_guass</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">guess_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c1"># Optimize the model from the starting guess</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">NelderMead</span><span class="p">(</span><span class="n">optimize_gauss</span><span class="p">,</span> <span class="n">guess_pars</span><span class="p">,</span> <span class="n">args_to_pass</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">true_gauss_noisy</span><span class="p">))</span>
+<span class="n">opt_result</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="c1"># Extract the best fit pars and plot the result</span>
+<span class="n">best_fit_pars</span> <span class="o">=</span> <span class="n">opt_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">gauss_best_fit</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="n">best_fit_pars</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">true_gauss_noisy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Noisy Data&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">guess_guass</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Guess&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gauss_best_fit</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Best Fit Model&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The result …</p>
+<img alt="_images/data_model_example.png" src="_images/data_model_example.png" />
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Robust Nelder Mead</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-1-fitting-a-gaussian-parameter-based">Example 1: Fitting a Gaussian (Parameter based)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-2-fitting-a-gaussian-numpy-based">Example 2: Fitting a Gaussian (Numpy based)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neldermead_api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neldermead_api.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Nelder Mead Optimization</a></li>
+      <li>Next: <a href="neldermead_api.html" title="next chapter">API</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Bryson Cale.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tutorials.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

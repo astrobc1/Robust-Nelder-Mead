@@ -20,13 +20,13 @@ class NelderMead:
         """Initiate a Nelder Mead solver.
         
         Args:
-            target_function (function): The function to optimize. Must be called as target_function(pars, \*args_to_pass, \*\*kwargs_to_pass), and return (F, CONS), where F is the value to minimize and CONS = g(x) is the constraint. If g(x) < 0, the target function is penalized, along with parameters being out of bounds.
+            target_function (function): The function to optimize. Must be called as ``target_function(pars, *args_to_pass, **kwargs_to_pass)``, with return values: ``(F, CONS)``, where F is the value to minimize and CONS = g(x) is the constraint. If g(x) < 0, the target function is penalized, along with parameters being out of bounds.
             init_pars (Parameters or np.ndarray): The initial parameters.
             names (list or np.ndarray, optional): The names of the parameters. Internally defaults to par1, par2, ...
             minvs (list or np.ndarray, optional): The lower bounds. Defaults to -inf.
             maxvs (list or np.ndarray, optional): The upper bounds. Defaults to inf.
             varies (list or np.ndarray, optional): Whether or not to vary (and effectively solve for) this parameter. Defaults to True.
-            max_f_evals (int, optional): The maximum total number of function calls, including all full simplex + subspace calls. Defaults to 5000 number of varied parameters.
+            max_f_evals (int, optional): The maximum total number of function calls, including all full simplex + subspace calls. Defaults to 5000 x number of varied parameters.
             xtol (float, optional): If the relative range of all parameters are below this threshold (i.e, span a range smaller than this), then the solver breaks. Defaults to 1E-4.
             ftol (float, optional): If the relative range of function values is below this threshold, then the solver breaks and is considered converged.. Defaults to 1E-4.
             n_iterations (int, optional): The number of iterations to run. One iteration = 1 full simplex call + Subspace calls for consecutive pairs of parameters, including last parameter, first parameter. Defaults to = number of varied parameters.
@@ -53,6 +53,7 @@ class NelderMead:
             
         # The arguments to pass to the target function
         self.args_to_pass = args_to_pass
+        self.kwargs_to_pass = kwargs_to_pass
         
         # The panalty term
         self.penalty = penalty
@@ -378,7 +379,7 @@ class NelderMead:
         if self.uses_parameters:
             f, c = self.target_function(self.test_pars, *self.args_to_pass, **self.kwargs_to_pass)
         else:
-            f, c = self.target_function(self.test_pars.unpack(keys=['values'])['values'], *self.args_to_pass)
+            f, c = self.target_function(self.test_pars.unpack(keys=['values'])['values'], *self.args_to_pass, **self.kwargs_to_pass)
         
         # Penalize the target function if pars are out of bounds or constraint is less than zero
         f += self.penalty * np.where((self.xpass < self.init_pars_numpy['minvs']) | (self.xpass > self.init_pars_numpy['maxvs']))[0].size

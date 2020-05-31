@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>API &#8212; Robust Nelder Mead  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<p>The Nelder Mead Optimizer.</p>
+<dl class="py class">
+<dt id="robustneldermead.neldermead.NelderMead">
+<em class="property">class </em><code class="sig-prename descclassname">robustneldermead.neldermead.</code><code class="sig-name descname">NelderMead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_function</span></em>, <em class="sig-param"><span class="n">init_pars</span></em>, <em class="sig-param"><span class="n">names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minvs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxvs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">varies</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_f_evals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xtol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">ftol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">n_iterations</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">no_improve_break</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">penalty</span><span class="o">=</span><span class="default_value">1000000.0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">gamma</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">delta</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">args_to_pass</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs_to_pass</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#robustneldermead.neldermead.NelderMead" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to interact with the Nelder Mead optimizer.</p>
+<dl class="py method">
+<dt id="robustneldermead.neldermead.NelderMead.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_function</span></em>, <em class="sig-param"><span class="n">init_pars</span></em>, <em class="sig-param"><span class="n">names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minvs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">maxvs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">varies</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_f_evals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xtol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">ftol</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">n_iterations</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">no_improve_break</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">penalty</span><span class="o">=</span><span class="default_value">1000000.0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">gamma</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">delta</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">args_to_pass</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs_to_pass</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#robustneldermead.neldermead.NelderMead.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiate a Nelder Mead solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_function</strong> (<em>function</em>) – The function to optimize. Must be called as <code class="docutils literal notranslate"><span class="pre">target_function(pars,</span> <span class="pre">*args_to_pass,</span> <span class="pre">**kwargs_to_pass)</span></code>, with return values: <code class="docutils literal notranslate"><span class="pre">(F,</span> <span class="pre">CONS)</span></code>, where F is the value to minimize and CONS = g(x) is the constraint. If g(x) &lt; 0, the target function is penalized, along with parameters being out of bounds.</p></li>
+<li><p><strong>init_pars</strong> (<em>Parameters</em><em> or </em><em>np.ndarray</em>) – The initial parameters.</p></li>
+<li><p><strong>names</strong> (<em>list</em><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The names of the parameters. Internally defaults to par1, par2, …</p></li>
+<li><p><strong>minvs</strong> (<em>list</em><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The lower bounds. Defaults to -inf.</p></li>
+<li><p><strong>maxvs</strong> (<em>list</em><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The upper bounds. Defaults to inf.</p></li>
+<li><p><strong>varies</strong> (<em>list</em><em> or </em><em>np.ndarray</em><em>, </em><em>optional</em>) – Whether or not to vary (and effectively solve for) this parameter. Defaults to True.</p></li>
+<li><p><strong>max_f_evals</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum total number of function calls, including all full simplex + subspace calls. Defaults to 5000 x number of varied parameters.</p></li>
+<li><p><strong>xtol</strong> (<em>float</em><em>, </em><em>optional</em>) – If the relative range of all parameters are below this threshold (i.e, span a range smaller than this), then the solver breaks. Defaults to 1E-4.</p></li>
+<li><p><strong>ftol</strong> (<em>float</em><em>, </em><em>optional</em>) – If the relative range of function values is below this threshold, then the solver breaks and is considered converged.. Defaults to 1E-4.</p></li>
+<li><p><strong>n_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of iterations to run. One iteration = 1 full simplex call + Subspace calls for consecutive pairs of parameters, including last parameter, first parameter. Defaults to = number of varied parameters.</p></li>
+<li><p><strong>no_improve_break</strong> (<em>int</em><em>, </em><em>optional</em>) – The consective number of times the solver needs to converge (reach ftol) before breaking. Defaults to 3.</p></li>
+<li><p><strong>penalty</strong> (<em>float</em><em>, </em><em>optional</em>) – The penalty term added to the target function return value if either parameters are out of bounds or if the constraint is &lt; 0.. Defaults to 1E6.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – NM hyper-parameter (see src code). Defaults to 1.</p></li>
+<li><p><strong>gamma</strong> (<em>float</em><em>, </em><em>optional</em>) – NM hyper-parameter (see src code). Defaults to 2.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – NM hyper-parameter (see src code). Defaults to 0.5.</p></li>
+<li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – NM hyper-parameter (see src code). Defaults to 0.5.</p></li>
+<li><p><strong>args_to_pass</strong> (<em>tuple</em><em>, </em><em>optional</em>) – The additional arguments to pass to the target function. Defaults to (), empty tuple.</p></li>
+<li><p><strong>kwargs_to_pass</strong> (<em>dict</em><em>, </em><em>optional</em>) – The additional keyword arguments to pass to the target function. Defaults to {}, empty dict.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Robust Nelder Mead</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorials.html" title="previous chapter">Tutorials</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Bryson Cale.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/neldermead_api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

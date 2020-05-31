@@ -1,5 +1,5 @@
 import numpy as np
-from neldermead.neldermead import NelderMead
+from robustneldermead.neldermead import NelderMead
 from optimparameters import parameters as Parameters
 import matplotlib.pyplot as plt
 
