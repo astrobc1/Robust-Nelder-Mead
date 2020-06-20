@@ -21,10 +21,9 @@ x = np.arange(-30, 30, .01)
 # The "true" parameters and Gaussian
 true_pars = np.array([0.8, 2.3, 4.7])
 true_gauss = gauss(true_pars, x)
-true_gauss_noisy = np.copy(true_gauss)
 
 # Make a noisy version
-true_gauss = np.copy(true_gauss)
+true_gauss_noisy = np.copy(true_gauss)
 for i in range(true_gauss.size):
     true_gauss_noisy[i] = true_gauss[i] + (np.random.randn() / 100)
 

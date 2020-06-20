@@ -43,13 +43,12 @@ class NelderMead:
         # The target function
         self.target_function = target_function
         
+        # The tolerance on x and f
         self.xtol, self.ftol = xtol, ftol
             
-            
-        if no_improve_break is not None:
-            self.no_improve_break = no_improve_break
-        else:
-            self.no_improve_break = 3
+        
+        # The number of consecutive convergences to actually converge
+        self.no_improve_break = no_improve_break
             
         # The arguments to pass to the target function
         self.args_to_pass = args_to_pass
@@ -92,6 +91,9 @@ class NelderMead:
         # Init the subspaces
         self.init_subspaces()
         
+        # Reason for returning, may be anything
+        self.converged = False
+        
     def init_subspaces(self):
         init_pars_varies_inds = np.where(self.init_pars_numpy['varies'])[0]
         self.subspaces = [np.array([init_pars_varies_inds[i], init_pars_varies_inds[i+1]], dtype=int) for i in range(self.n_pars_vary - 1)]
@@ -103,9 +105,8 @@ class NelderMead:
             
         self.fcalls = 0
         self.dx = np.inf
-        self.fmin = np.inf # breaks when less than ftol N times, updated
+        self.fmin = np.inf # breaks when less than ftol N times.
         self.xmin = copy.deepcopy(self.init_pars)
-        
             
     def init_params(self, init_pars, names=None, minvs=None, maxvs=None, varies=None):
         
@@ -129,7 +130,6 @@ class NelderMead:
         self.init_pars_vary_indices = np.where(self.init_pars_numpy['varies'])[0]
         
         
-        
         # Number of varied parameters
         self.n_pars_vary = len(self.varied_pars_original)
         
@@ -142,8 +142,11 @@ class NelderMead:
         diag = np.diag(0.5 * self.varied_pars_numpy_original['values'])
         right[:, :-1] = diag
         
-        # Define the base simplex
+        # Define a base simplex
         self.base_simplex = left + right
+        
+        # Copy the base simplex
+        self.current_simplex = np.copy(self.base_simplex)
         
         # Sanity check init params
         bad_pars = self.init_pars.sanity_check()
@@ -163,9 +166,10 @@ class NelderMead:
             self.current_subspace_indices = np.array([par_names_all.index(p) for p in self.current_subspace_names], dtype=int)
             
         # Create an array for the default parameters
-        self.xpass = self.xmin.unpack(keys='values')['values']
+        self.xpass_values = self.xmin.unpack(keys='values')['values']
         
         if len(self.current_subspace_indices) < self.n_pars_vary:
+            
             # Original
             v1 = [self.init_pars_numpy['values'][self.current_subspace_indices[0]],
                 self.init_pars_numpy['values'][self.current_subspace_indices[1]]]
@@ -179,8 +183,8 @@ class NelderMead:
                 self.init_pars_numpy['values'][self.current_subspace_indices[1]]]
             simplex_sub = np.array([v1, v2, v3]).T
         else:
-            simplex_sub = np.copy(self.base_simplex)
-        
+            simplex_sub = np.copy(self.current_simplex)
+
         return simplex_sub
 
     def solve_subspace(self, indices=None, par_names=None):
@@ -234,14 +238,16 @@ class NelderMead:
 
             # break after max number function calls is reached.
             if self.fcalls >= self.max_f_evals:
+                self.converged = False
                 break
                 
-            # Break if f tolerance has been met n_small_steps in a row.
+            # Break if f tolerance has been met
             if self.compute_ftol(fmin, fnp1) > self.ftol:
                 n_converged = 0
             else:
                 n_converged += 1
             if n_converged >= self.no_improve_break:
+                self.converged = True
                 break
 
             # Idea of NM: Given a sorted simplex; N + 1 Vectors of N parameters,
@@ -305,6 +311,9 @@ class NelderMead:
         # Update the best fit parameters
         for i, p in enumerate(self.current_subspace_names):
             self.xmin[p].value = xmin[i]
+            ii = np.where(self.init_pars_vary_indices == self.current_subspace_indices[i])[0]
+            self.current_simplex[ii, -nxp1:] = simplex[i, :]
+            
         # Redefine the numpy variable
         self.xmin_numpy = self.xmin.unpack()
         
@@ -323,8 +332,8 @@ class NelderMead:
             # Perform Ameoba call for all parameters
             self.solve_subspace(indices=self.init_pars_vary_indices)
             
-            # If theres < 2 params, a three-simplex is the smallest simplex used and only used once.
-            if self.n_pars_vary < 3:
+            # If there's <= 2 params, a three-simplex is the smallest simplex used and only used once.
+            if self.n_pars_vary <= 2:
                 break
             
             # Perform Ameoba call for dim=2 ( and thus three simplex) subspaces
@@ -337,14 +346,30 @@ class NelderMead:
             iteration += 1
             
             # Compute the max absolute range of the simplex
-            dx = np.max(self.compute_xtol(np.nanmin(self.base_simplex, axis=1), np.nanmax(self.base_simplex, axis=1)))
+            dx = np.max(self.compute_xtol(np.nanmin(self.current_simplex, axis=1), np.nanmax(self.current_simplex, axis=1)))
+        
+        # Compute uncertainties
+        #self.compute_uncertainties(self.current_simplex)
             
+        # Recreate new parameter obejcts
         if self.uses_parameters:
             xmin = self.xmin
         else:
             xmin = self.xmin.unpack(keys=['values'])['values']
             
         return xmin, self.fmin, self.fcalls
+    
+    @staticmethod
+    #@njit(numba.types.float64[:, :](numba.types.float64[:, :]))
+    def compute_uncertainties(simplex):
+        nx, nxp1 = simplex.shape
+        p = np.empty(shape=(nxp1, nxp1), dtype=np.ndarray)
+        for i in range(nxp1):
+            for j in range(nxp1):
+                if i != j:
+                    p[i, j] = (simplex[:, i] + simplex[:, j]) / 2
+        
+        
         
         
     @staticmethod
@@ -367,13 +392,13 @@ class NelderMead:
     def foo_wrapper(self, x):
 
         # Update the current varied subspace from the current simplex
-        self.xpass[self.current_subspace_indices] = x
+        self.xpass_values[self.current_subspace_indices] = x
 
         # Correct the vary attributes
         v = np.zeros(self.n_pars, dtype=bool)
-        v[self.current_subspace_indices] = 1
+        v[self.current_subspace_indices] = True
         
-        self.test_pars.setv(values=self.xpass, varies=v)
+        self.test_pars.setv(values=self.xpass_values, varies=v)
         
         # Call the target function
         if self.uses_parameters:
@@ -382,7 +407,7 @@ class NelderMead:
             f, c = self.target_function(self.test_pars.unpack(keys=['values'])['values'], *self.args_to_pass, **self.kwargs_to_pass)
         
         # Penalize the target function if pars are out of bounds or constraint is less than zero
-        f += self.penalty * np.where((self.xpass < self.init_pars_numpy['minvs']) | (self.xpass > self.init_pars_numpy['maxvs']))[0].size
+        f += self.penalty * np.where((self.xpass_values < self.init_pars_numpy['minvs']) | (self.xpass_values > self.init_pars_numpy['maxvs']))[0].size
         f += self.penalty * (c < 0)
         
         # Update fcalls
