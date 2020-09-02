@@ -14,7 +14,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="robustneldermead",
-    version="1.0.3",
+    version="1.0.5",
     author="Bryson Cale",
     author_email="bryson.cale1@gmail.com",
     description="Nelder Mead algorithm for high dimensional parameter spaces",
